@@ -121,7 +121,7 @@ function Select({ options, placeholder }: Props) {
             }
             onBlurCapture={(e) => {
               setTimeout(() => {
-                setFilteredUsers([]);
+                // setFilteredUsers([]);
               }, 200);
             }}
           />
