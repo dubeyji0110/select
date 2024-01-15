@@ -109,10 +109,14 @@ function Select({ options, placeholder }: Props) {
             onKeyDown={handleKeyDown}
             onFocus={() =>
               setFilteredUsers(
-                options.filter(
-                  (x) =>
-                    !selectedUsers.map((y) => y.value.id).includes(x.value.id)
-                )
+                options
+                  .filter((x) =>
+                    x.label.toLowerCase().includes(inputValue.toLowerCase())
+                  )
+                  .filter(
+                    (x) =>
+                      !selectedUsers.map((y) => y.value.id).includes(x.value.id)
+                  )
               )
             }
             onBlurCapture={(e) => {
