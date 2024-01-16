@@ -1,15 +1,8 @@
 "use client";
-import {
-  ChangeEvent,
-  FormEvent,
-  KeyboardEvent,
-  LegacyRef,
-  Ref,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { ChangeEvent, FormEvent, KeyboardEvent, useState } from "react";
 import { User } from "@/data";
+import { Images } from "@/assests";
+import Image from "next/image";
 
 interface Option {
   label: string;
@@ -47,12 +40,20 @@ function Select({ options, placeholder }: Props) {
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Backspace" && inputValue.length == 0) {
       setSelectedUsers((prev) => prev.slice(0, -1));
-    }
-    if (filteredUsers.length > 0) {
+    } else if (filteredUsers.length > 0) {
       if (e.key === "ArrowDown") {
-        setHighlighted((prev) => (prev + 1) % filteredUsers.length);
+        const nextIndex = (highlighted + 1) % filteredUsers.length;
+        document.getElementById(`${nextIndex}`)?.scrollIntoView({
+          behavior: "smooth",
+        });
+        setHighlighted(nextIndex);
       } else if (e.key === "ArrowUp") {
-        setHighlighted((prev) => (prev - 1) % filteredUsers.length);
+        let nextIndex = (highlighted - 1) % filteredUsers.length;
+        if (nextIndex < 0) nextIndex = filteredUsers.length - 1;
+        document.getElementById(`${nextIndex}`)?.scrollIntoView({
+          behavior: "smooth",
+        });
+        setHighlighted(nextIndex);
       }
     }
   };
@@ -78,16 +79,22 @@ function Select({ options, placeholder }: Props) {
   };
 
   return (
-    <div className="border border-black rounded-md p-2 flex relative w-full items-center">
-      <div className="mr-1 flex space-x-1 space-y-1 flex-wrap items-center">
+    <div className="border border-white rounded-md p-2 flex relative w-full items-center">
+      <div className="mr-1 flex flex-wrap items-center">
         {selectedUsers.map((user) => (
           <div
             key={user.value.id}
-            className="shadow-sm outline outline-1 outline-[#afafaf] h-min bg-white flex items-center p-0 leading-none rounded-2xl overflow-hidden"
+            className="shadow-sm outline outline-2 outline-[#e63946] m-1 h-min bg-[#457b9d]  flex items-center p-0 leading-none rounded-2xl overflow-hidden"
           >
-            <p className="text-xs flex-1 pl-2">{user.label}</p>
+            <Image
+              // @ts-ignore
+              src={Images[user.value.image]}
+              alt="profile image"
+              className="rounded-full w-8 h-8 ml-1"
+            />
+            <p className="flex-1 pl-2 pr-1 font-medium">{user.label}</p>
             <span
-              className="text-slate-800 hover:bg-red-500 hover:text-white cursor-pointer p-1"
+              className=" cursor-pointer p-1 inline-block h-full"
               onClick={() => {
                 setSelectedUsers((prev) =>
                   prev.filter((x) => x.value.id !== user.value.id)
@@ -102,7 +109,7 @@ function Select({ options, placeholder }: Props) {
       <div className="flex-1">
         <form onSubmit={handleSubmit} className="w-full min-w-24">
           <input
-            className="focus-visible:border-0 focus-visible:outline-0 w-full"
+            className="focus-visible:border-0 focus-visible:outline-0 w-full bg-transparent "
             placeholder={placeholder}
             value={inputValue}
             onChange={handleChange}
@@ -119,26 +126,39 @@ function Select({ options, placeholder }: Props) {
                   )
               )
             }
-            onBlurCapture={(e) => {
-              setTimeout(() => {
-                // setFilteredUsers([]);
-              }, 200);
-            }}
           />
           <button type="submit" className="hidden" />
         </form>
         {filteredUsers.length > 0 && (
-          <div className="absolute top-full left-0 w-full shadow-md z-20 rounded-sm">
-            <ul className="bg-white">
+          <div className="absolute top-[110%] left-0 w-full shadow-md z-20 rounded-lg overflow-auto max-h-[250px]">
+            <ul className="bg-[#244256]">
               {filteredUsers.map((user, index) => (
                 <li
-                  className={`hover:bg-[#f2f2f2] px-4 py-2 cursor-pointer ${
-                    highlighted === index && "bg-[#f2f2f2]"
+                  className={`hover:bg-[#457b9d] px-4 py-2 cursor-pointer ${
+                    highlighted === index && "bg-[#457b9d]"
                   }`}
                   key={user.value.id}
+                  id={`${index}`}
                   onClick={() => handleEnterUser(user)}
                 >
-                  {user.label}
+                  <div className="flex items-center">
+                    <div>
+                      <Image
+                        // @ts-ignore
+                        src={Images[user.value.image]}
+                        width={100}
+                        height={100}
+                        alt="profile image"
+                        className="rounded-full h-8 w-8 mr-2"
+                      />
+                    </div>
+                    <div>
+                      <p>{user.label}</p>
+                      <p className="text-sm text-slate-300">
+                        {user.value.email}
+                      </p>
+                    </div>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -147,7 +167,7 @@ function Select({ options, placeholder }: Props) {
       </div>
       {selectedUsers.length > 0 && (
         <div
-          className="cursor-pointer"
+          className="cursor-pointer text-lg "
           onClick={() => {
             setInputValue("");
             setFilteredUsers([]);
